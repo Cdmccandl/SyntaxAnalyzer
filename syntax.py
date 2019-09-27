@@ -134,7 +134,7 @@ if __name__ == "__main__":
     input.close()
 
     # in the beginning we will write the input...
-        # as a sequence of terminal symbols, ending by $
+    # as a sequence of terminal symbols, ending by $
     # the input will be the output of the lexical analyzer
 
     input = ['l', '+', 'i', '/', 'l', '*', 'l', '$']

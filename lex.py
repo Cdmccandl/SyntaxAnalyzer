@@ -60,7 +60,7 @@ def addChar(input, lexeme):
 
 class Token(Enum):
     '''all tokens'''
-    ADD_OP = 1
+    ADDITION = 1
     ASSIGNMENT = 2
     BEGIN = 3
     BOOLEAN_TYPE = 4
@@ -78,12 +78,12 @@ class Token(Enum):
     INTEGER_TYPE = 16
     LESS = 17
     LESS_EQUAL = 18
-    MUL_OP = 19
+    MULTIPLICATION = 19
     PERIOD = 20
     PROGRAM = 21
     READ = 22
     SEMICOLON = 23
-    SUB_OP = 24
+    SUBTRACTION = 24
     THEN = 25
     TRUE = 26
     VAR = 27
@@ -93,9 +93,9 @@ class Token(Enum):
 
 LOOKUP = {  # lexeme to token conversion
     # TODO how to represent integer literal and type
-    "+": Token.ADD_OP,
-    "-": Token.SUB_OP,
-    "*": Token.MUL_OP,
+    "+": Token.ADDITION,
+    "-": Token.SUBTRACTION,
+    "*": Token.MULTIPLICATION,
     "begin": Token.BEGIN,
     ":": Token.COLON,
     ":=": Token.ASSIGNMENT,
@@ -153,13 +153,9 @@ def lex(input):
     # TODO: read letters
     if charClass == CharClass.LETTER:
         input, lexeme = addChar(input, lexeme)
-        while True:  # read subsequent letters until blank
+        while getChar(input)[1] in (charClass.LETTER,
+                                    charClass.DIGIT):
             input, lexeme = addChar(input, lexeme)
-            c, charClass = getChar(input)
-            if charClass == CharClass.BLANK:  # FIXME should probably be a letter or number
-                break
-            if charClass == CharClass.OPERATOR:
-                break
         if lexeme in KEYWORDS:
             return(input, lexeme, KEYWORDS[lexeme])
         else:
@@ -168,8 +164,8 @@ def lex(input):
     # TODO: return digit literal vs identifier
     if charClass == CharClass.DIGIT:
         while True:
-            input, lexeme=addChar(input, lexeme)
-            c, charClass=getChar(input)
+            input, lexeme = addChar(input, lexeme)
+            c, charClass = getChar(input)
             if charClass != CharClass.DIGIT:
                 break
         return (input, lexeme, Token.INTEGER_LITERAL)
@@ -177,7 +173,17 @@ def lex(input):
     # TODO: read an operator
     # TODO add conditional for :=
     if charClass == CharClass.OPERATOR:
-        input, lexeme=addChar(input, lexeme)
+        input, lexeme = addChar(input, lexeme)
+        if c in ('<', '>') and getChar(input)[0] == '=':
+            input, lexeme = addChar(input, lexeme)
+        if lexeme in LOOKUP:
+            return (input, lexeme, LOOKUP[lexeme])
+
+    if charClass == CharClass.PUNCTUATOR:
+        input, lexeme = addChar(input, lexeme)
+        if c == ':' and getChar(input)[0] == '=':
+            input, lexeme = addChar(input, lexeme)
+            return (input, lexeme, Token.ASSIGNMENT)
         if lexeme in LOOKUP:
             return (input, lexeme, LOOKUP[lexeme])
 
@@ -189,15 +195,15 @@ if __name__ == "__main__":
     # check if source file was passed and exists
     if len(sys.argv) != 2:
         raise ValueError("Missing source file")
-    source=open(sys.argv[1], "rt")
+    source = open(sys.argv[1], "rt")
     if not source:
         raise IOError("Couldn't open source file")
-    input=source.read()
+    input = source.read()
     source.close()
-    output=[]
+    output = []
 
     while True:  # main loop
-        input, lexeme, token=lex(input)
+        input, lexeme, token = lex(input)
         if lexeme == None:
             break
         output.append((lexeme, token))
