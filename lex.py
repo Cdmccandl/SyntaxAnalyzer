@@ -150,10 +150,10 @@ def lex(input):
     if charClass == CharClass.EOF:
         return (input, None, None)
 
-    # TODO: reading letters
+    # TODO: read letters
     if charClass == CharClass.LETTER:
         input, lexeme = addChar(input, lexeme)
-        while True:  # reads subsequent letters until blank
+        while True:  # read subsequent letters until blank
             input, lexeme = addChar(input, lexeme)
             c, charClass = getChar(input)
             if charClass == CharClass.BLANK:  # FIXME should probably be a letter or number
@@ -161,7 +161,7 @@ def lex(input):
             if charClass == CharClass.OPERATOR:
                 break
         if lexeme in KEYWORDS:
-            return(input, lexeme, KEYWORDS[lexeme]
+            return(input, lexeme, KEYWORDS[lexeme])
         else:
             return(input, lexeme, Token.IDENTIFIER)
 
@@ -174,7 +174,7 @@ def lex(input):
                 break
         return (input, lexeme, Token.INTEGER_LITERAL)
 
-    # TODO: reading an operator
+    # TODO: read an operator
     # TODO add conditional for :=
     if charClass == CharClass.OPERATOR:
         input, lexeme=addChar(input, lexeme)
