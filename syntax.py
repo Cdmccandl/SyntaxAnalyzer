@@ -2,7 +2,7 @@
 # A Syntax Analyzer for an expression
 
 import sys
-
+import lex
 
 def loadGrammar(input_):
     """reads the given input,
@@ -148,7 +148,16 @@ if __name__ == "__main__":
     # as a sequence of terminal symbols, ending by $
     # the input will be the output of the lexical analyzer
 
-    if parse(text, grammar, actions, gotos):
+    output = []
+
+    while True:
+        text, lexeme, token = lex.lex(text) # lex() returns (lexeme, token)
+        print('token:', token)
+        if not token:
+            break
+        output.append(token)
+
+    if parse(output, grammar, actions, gotos):
         print("Input is syntactically correct!")
     else:
         print("Code has syntax errors!")
