@@ -1,11 +1,14 @@
 # CS3210 - Principles of Programming Languages - Fall 2019
 # A Syntax Analyzer for an expression
 
+import sys
 
-def loadGrammar(input):
-    '''reads the given input and returns the grammar as a list of productions'''
+
+def loadGrammar(input_):
+    """reads the given input,
+       returns the grammar as a list of productions"""
     grammar = []
-    for line in input:
+    for line in input_:
         grammar.append(line.strip())
     return grammar
 
@@ -21,25 +24,25 @@ def getRHS(production):
 
 
 def printGrammar(grammar):
-    '''prints the productions of a given grammar, one per line'''
+    '''prints the productions of a given grammar - one per line'''
     for production in grammar:
         print(getLHS(production), end=" -> ")
         print(getRHS(production))
 
 
-def loadTable(input):
-    '''reads the given input containing an SLR parsing table and returns the "actions" and "gotos" as dictionaries'''
-
+def loadTable(input_):
+    """reads the given input containing an SLR parsing table,
+       returns the "actions" and "gotos" as dictionaries"""
     actions = {}
     gotos = {}
-    header = input.readline().strip().split(",")
+    header = input_.readline().strip().split(",")
     end = header.index("$")
     tokens = []
     for field in header[1:end + 1]:
         tokens.append(field)
         # tokens.append(int(field))
     variables = header[end + 1:]
-    for line in input:
+    for line in input_:
         row = line.strip().split(",")
         state = int(row[0])
         for i in range(len(tokens)):
@@ -73,8 +76,8 @@ def printGotos(gotos):
         print(gotos[key])
 
 
-def parse(input, grammar, actions, gotos):
-    """given an input (source program), grammar, actions, and gotos,
+def parse(input_, grammar, actions, gotos):
+    """given an input (a source program), grammar, actions, and gotos,
        returns true/false depending whether the input should be accepted or not"""
 
     stack = []
@@ -82,10 +85,10 @@ def parse(input, grammar, actions, gotos):
     while True:
         print("stack: ", end="")
         print(stack, end=" ")
-        print("input: ", end="")
-        print(input, end=" ")
+        print("input_: ", end="")
+        print(input_, end=" ")
         state = stack[-1]
-        token = input[0]
+        token = input_[0]
         action = actions[(state, token)]
         print("action: ", end="")
         print(action)
@@ -97,7 +100,7 @@ def parse(input, grammar, actions, gotos):
 
         if 's' in action:
             sNumber = int(action[1:])
-            stack.append(input.pop(0))
+            stack.append(input_.pop(0))
             stack.append(sNumber)
 
             # TODO: implement the reduce operation(pops the value and state from the stack and reduces)
@@ -122,23 +125,30 @@ def parse(input, grammar, actions, gotos):
 
 if __name__ == "__main__":
 
-    input = open("grammar.txt", "rt")
-    grammar = loadGrammar(input)
-    printGrammar(grammar)
-    input.close()
+    # check if source file was passed and exists
+    if len(sys.argv) != 2:
+        raise ValueError("Missing source file!")
+    source = open(sys.argv[1], "rt")
+    if not source:
+        raise IOError("Could not open source file.")
+    text = source.read()
+    source.close()
+    output = []
 
-    input = open("slr_table.csv", "rt")
-    actions, gotos = loadTable(input)
-    printActions(actions)
-    printGotos(gotos)
-    input.close()
+    with open("grammar.txt", "rt") as f:
+        grammar = loadGrammar(f)
+        printGrammar(grammar)
+
+    with open("slr_table.csv", "rt") as f:
+        actions, gotos = loadTable(f)
+        printActions(actions)
+        printGotos(gotos)
 
     # in the beginning we will write the input...
     # as a sequence of terminal symbols, ending by $
     # the input will be the output of the lexical analyzer
 
-    input = ['l', '+', 'i', '/', 'l', '*', 'l', '$']
-    if parse(input, grammar, actions, gotos):
+    if parse(text, grammar, actions, gotos):
         print("Input is syntactically correct!")
     else:
         print("Code has syntax errors!")
