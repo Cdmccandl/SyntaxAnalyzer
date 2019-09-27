@@ -152,7 +152,6 @@ if __name__ == "__main__":
 
     while True:
         text, lexeme, token = lex.lex(text) # lex() returns (lexeme, token)
-        print('token:', token)
         if not token:
             break
         output.append(token)
