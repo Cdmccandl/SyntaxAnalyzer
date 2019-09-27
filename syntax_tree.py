@@ -3,31 +3,38 @@
 
 from tree import Tree
 
-# reads the given input and returns the grammar as a list of productions
+
 def loadGrammar(input):
+    '''reads the given input and returns the grammar as a list of productions'''
     grammar = []
     for line in input:
         grammar.append(line.strip())
     return grammar
 
-# returns the LHS (left hand side) of a given production
+
 def getLHS(production):
+    '''returns the LHS (left hand side) of a given production'''
     return production.split("->")[0].strip()
 
-# returns the RHS (right hand side) of a given production
+
 def getRHS(production):
+    '''returns the RHS (right hand side) of a given production'''
     return production.split("->")[1].strip().split(" ")
 
-# prints the productions of a given grammar, one per line
+
 def printGrammar(grammar):
+    '''prints the productions of a given grammar, one per line'''
     i = 0
     for production in grammar:
-        print(str(i) + ". " + getLHS(production), end = " -> ")
+        print(str(i) + ". " + getLHS(production), end=" -> ")
         print(getRHS(production))
         i += 1
 
-# reads the given input containing an SLR parsing table and returns the "actions" and "gotos" as dictionaries
+
 def loadTable(input):
+    """reads the given input containing an SLR parsing table
+       and returns the "actions" and "gotos" as dictionaries"""
+
     actions = {}
     gotos = {}
     header = input.readline().strip().split(",")
@@ -56,20 +63,26 @@ def loadTable(input):
             gotos[key] = value
     return (actions, gotos)
 
-# prints the given actions, one per line
+
 def printActions(actions):
+    '''prints the given actions, one per line'''
+
     for key in actions:
-        print(key, end = " -> ")
+        print(key, end=" -> ")
         print(actions[key])
 
-# prints the given gotos, one per line
+
 def printGotos(gotos):
+    '''prints the given gotos, one per line'''
+
     for key in gotos:
-        print(key, end = " -> ")
+        print(key, end=" -> ")
         print(gotos[key])
 
-# given an input (source program), grammar, actions, and gotos, returns true/false depending whether the input should be accepted or not
+
 def parse(input, grammar, actions, gotos):
+    """given an input (source program), grammar, actions, and gotos,
+       returns true/false depending whether the input should be accepted or not"""
 
     # TODO #1: create a list of trees
     trees = []
@@ -77,14 +90,14 @@ def parse(input, grammar, actions, gotos):
     stack = []
     stack.append(0)
     while True:
-        print("stack: ", end = "")
-        print(stack, end = " ")
-        print("input: ", end = "")
-        print(input, end = " ")
+        print("stack: ", end="")
+        print(stack, end=" ")
+        print("input: ", end="")
+        print(input, end=" ")
         state = stack[-1]
         token = input[0]
         action = actions[(state, token)]
-        print("action: ", end = "")
+        print("action: ", end="")
         print(action)
 
         if action is None:
@@ -102,7 +115,6 @@ def parse(input, grammar, actions, gotos):
             newTree.data = token
             trees.append(newTree)
 
-
         # reduce operation
         elif action[0] == 'r':
             production = grammar[int(action[1])]
@@ -117,7 +129,6 @@ def parse(input, grammar, actions, gotos):
             # TODO #3: create a new tree and set data to lhs
             newerTree = Tree()
             newerTree.data = lhs
-            
 
             # TODO #4: get "len(rhs)" trees from the right of the list of trees and add each of them as child of the new tree you created, preserving the left-right order
             for tree in trees[-len(rhs):]:
@@ -125,7 +136,6 @@ def parse(input, grammar, actions, gotos):
 
             # TODO #5: remove "len(rhs)" trees from the right of the list of trees
             trees = trees[:-len(rhs)]
-
 
             # TODO #6: append the new tree to the list of trees
             trees.append(newerTree)
@@ -145,7 +155,7 @@ def parse(input, grammar, actions, gotos):
             # TODO #8: return the new tree
             return root
 
-# main
+
 if __name__ == "__main__":
 
     input = open("grammar.txt", "rt")
@@ -159,12 +169,15 @@ if __name__ == "__main__":
     # printGotos(gotos)
     input.close()
 
-    # in the beginning we will write the input as a sequence of terminal symbols, ending by $
+    # in the beginning we will write the input...
+    # as a sequence of terminal symbols, ending by $
     # later we will integrate this code with the lexical analyzer
-    input = [ 'l', '+', 'i', '/', 'l', '*', 'l', '$' ]
+
+    input = ['l', '+', 'i', '/', 'l', '*', 'l', '$']
 
     # tree building update
     tree = parse(input, grammar, actions, gotos)
+
     if tree:
         print("Input is syntactically correct!")
         print("Parse Tree:")

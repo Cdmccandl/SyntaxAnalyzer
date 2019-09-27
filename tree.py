@@ -5,6 +5,7 @@
 
 TAB = "   "
 
+
 class Tree:
 
     def __init__(self):
@@ -14,7 +15,7 @@ class Tree:
     def add(self, child):
         self.children.append(child)
 
-    def print(self, tab = ""):
+    def print(self, tab=""):
         if self.data != None:
             print(tab + self.data)
             tab += TAB
@@ -24,16 +25,16 @@ class Tree:
                 else:
                     print(tab + child)
 
-# main
+
 if __name__ == "__main__":
 
-    subtree = Tree();
+    subtree = Tree()
     subtree.data = "F"
     subtree.add("E")
     subtree.add("+")
     subtree.add("T")
 
-    tree = Tree();
+    tree = Tree()
     tree.data = "T"
     tree.add(subtree)
     tree.add("+")
