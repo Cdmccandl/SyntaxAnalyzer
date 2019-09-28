@@ -1,26 +1,22 @@
-PR -> program identifier block .
-identifier -> letter indentifier'
-identifier' -> letter identifier'
-identifier' -> digit identifier'
-identifier' -> ''
+PR -> program identifier block period
 block -> var_declaration_section compound_statement
 block -> compound_statement
 var_declaration_section -> var var_declaration var_declaration_section'
-var_declaration_section' -> ; var_declaration var_declaration_section'
+var_declaration_section' -> semicolon var_declaration var_declaration_section'
 var_declaration_section' ->
 var_declaration -> identifier var_declaration
-var_declaration -> : type
+var_declaration -> colon type
 type -> Integer
 type -> Boolean
 compound_statement -> begin statement
-compound_statement' -> ; statement compound_statement'
+compound_statement' -> semicolon statement compound_statement'
 compound_statement- -> end
 statement -> simple_statement
 statement -> structured_statement
 simple_statement -> assignment_statement
 simple_statement -> read_statement
 simple_statement -> write_statement
-assignment_statement -> identifier := expression
+assignment_statement -> identifier assignment expression
 read_statement -> read identifier
 write_statement -> write identifier
 write_statement -> write literal
@@ -35,14 +31,12 @@ expression -> boolean_expression
 arithmetic_expression -> arithmetic_expression + term 
 arithmetic_expression -> arithmetic_expression - term
 arithmetic_expression -> term
-term -> term * factor
+term -> term multiplication factor
 term -> factor
 factor -> identifier
 factor -> integer_literal 
 literal -> integer_literal
 literal -> boolean_literal 
-integer_literal -> digit integer_literal
-integer_literal -> ''
 boolean_literal -> true
 boolean_literal -> false
 boolean_expression -> boolean_literal

@@ -4,10 +4,10 @@
 from tree import Tree
 
 
-def loadGrammar(input):
+def loadGrammar(input_):
     '''reads the given input and returns the grammar as a list of productions'''
     grammar = []
-    for line in input:
+    for line in input_:
         grammar.append(line.strip())
     return grammar
 
@@ -31,20 +31,20 @@ def printGrammar(grammar):
         i += 1
 
 
-def loadTable(input):
+def loadTable(input_):
     """reads the given input containing an SLR parsing table
        and returns the "actions" and "gotos" as dictionaries"""
 
     actions = {}
     gotos = {}
-    header = input.readline().strip().split(",")
+    header = input_.readline().strip().split(",")
     end = header.index("$")
     tokens = []
     for field in header[1:end + 1]:
         tokens.append(field)
         # tokens.append(int(field))
     variables = header[end + 1:]
-    for line in input:
+    for line in input_:
         row = line.strip().split(",")
         state = int(row[0])
         for i in range(len(tokens)):
@@ -80,8 +80,8 @@ def printGotos(gotos):
         print(gotos[key])
 
 
-def parse(input, grammar, actions, gotos):
-    """given an input (source program), grammar, actions, and gotos,
+def parse(input_, grammar, actions, gotos):
+    """given an input (a source program), grammar, actions, and gotos,
        returns true/false depending whether the input should be accepted or not"""
 
     # TODO #1: create a list of trees
@@ -92,10 +92,10 @@ def parse(input, grammar, actions, gotos):
     while True:
         print("stack: ", end="")
         print(stack, end=" ")
-        print("input: ", end="")
-        print(input, end=" ")
+        print("input_: ", end="")
+        print(input_, end=" ")
         state = stack[-1]
-        token = input[0]
+        token = input_[0]
         action = actions[(state, token)]
         print("action: ", end="")
         print(action)
@@ -105,7 +105,7 @@ def parse(input, grammar, actions, gotos):
 
         # shift operation
         if action[0] == 's':
-            input.pop(0)
+            input_.pop(0)
             stack.append(token)
             state = int(action[1])
             stack.append(state)
@@ -158,26 +158,25 @@ def parse(input, grammar, actions, gotos):
 
 if __name__ == "__main__":
 
-    input = open("grammar.txt", "rt")
-    grammar = loadGrammar(input)
+    input_ = open("grammar.txt", "rt")
+    grammar = loadGrammar(input_)
     # printGrammar(grammar)
-    input.close()
+    input_.close()
 
-    input = open("slr_table.csv", "rt")
-    actions, gotos = loadTable(input)
+    input_ = open("slr_table.csv", "rt")
+    actions, gotos = loadTable(input_)
     # printActions(actions)
     # printGotos(gotos)
-    input.close()
+    input_.close()
 
-    # in the beginning we will write the input...
+    # in the beginning we will write the input_...
     # as a sequence of terminal symbols, ending by $
     # later we will integrate this code with the lexical analyzer
 
-    input = ['l', '+', 'i', '/', 'l', '*', 'l', '$']
+    input_ = ['l', '+', 'i', '/', 'l', '*', 'l', '$']
 
     # tree building update
-    tree = parse(input, grammar, actions, gotos)
-
+    tree = parse(input_, grammar, actions, gotos)
     if tree:
         print("Input is syntactically correct!")
         print("Parse Tree:")

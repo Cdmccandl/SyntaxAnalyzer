@@ -19,11 +19,11 @@ class CharClass(Enum):
     OTHER = 8
 
 
-def getChar(input):  # TODO getChar update with new Grammar
-    '''reads the next char from input and returns its class'''
-    if len(input) == 0:
+def getChar(input_):  # TODO getChar update with new Grammar
+    '''reads the next char from input_ and returns its class'''
+    if len(input_) == 0:
         return (None, CharClass.EOF)
-    c = input[0].lower()
+    c = input_[0].lower()
     if c.isalpha():
         return (c, CharClass.LETTER)
     if c.isdigit():
@@ -39,23 +39,23 @@ def getChar(input):  # TODO getChar update with new Grammar
     return (c, CharClass.OTHER)
 
 
-def getNonBlank(input):
+def getNonBlank(input_):
     '''calls getChar and getChar until it returns a non-blank'''
     ignore = ""
     while True:
-        c, charClass = getChar(input)
+        c, charClass = getChar(input_)
         if charClass == CharClass.BLANK:
-            input, ignore = addChar(input, ignore)
+            input_, ignore = addChar(input_, ignore)
         else:
-            return input
+            return input_
 
 
-def addChar(input, lexeme):
-    '''adds the next char from input to lexeme, advancing the input by one char'''
-    if len(input) > 0:
-        lexeme += input[0]
-        input = input[1:]
-    return (input, lexeme)
+def addChar(input_, lexeme):
+    '''adds the next char from input_ to lexeme, advancing the input_ by one char'''
+    if len(input_) > 0:
+        lexeme += input_[0]
+        input_ = input_[1:]
+    return (input_, lexeme)
 
 
 class Token(Enum):
@@ -138,54 +138,54 @@ KEYWORDS = {
     }
 
 
-def lex(input):
+def lex(input_):
     '''returns the next (lexeme, token) pair or None if EOF is reached'''
 
-    input = getNonBlank(input)
+    input_ = getNonBlank(input_)
 
-    c, charClass = getChar(input)
+    c, charClass = getChar(input_)
     lexeme = ""
 
     # check EOF first
     if charClass == CharClass.EOF:
-        return (input, None, None)
+        return (input_, None, None)
 
     # TODO: read letters
     if charClass == CharClass.LETTER:
-        input, lexeme = addChar(input, lexeme)
-        while getChar(input)[1] in (charClass.LETTER,
+        input_, lexeme = addChar(input_, lexeme)
+        while getChar(input_)[1] in (charClass.LETTER,
                                     charClass.DIGIT):
-            input, lexeme = addChar(input, lexeme)
+            input_, lexeme = addChar(input_, lexeme)
         if lexeme in KEYWORDS:
-            return(input, lexeme, KEYWORDS[lexeme])
+            return(input_, lexeme, KEYWORDS[lexeme])
         else:
-            return(input, lexeme, Token.IDENTIFIER)
+            return(input_, lexeme, Token.IDENTIFIER)
 
     # TODO: return digit literal vs identifier
     if charClass == CharClass.DIGIT:
         while True:
-            input, lexeme = addChar(input, lexeme)
-            c, charClass = getChar(input)
+            input_, lexeme = addChar(input_, lexeme)
+            c, charClass = getChar(input_)
             if charClass != CharClass.DIGIT:
                 break
-        return (input, lexeme, Token.INTEGER_LITERAL)
+        return (input_, lexeme, Token.INTEGER_LITERAL)
 
     # TODO: read an operator
     # TODO add conditional for :=
     if charClass == CharClass.OPERATOR:
-        input, lexeme = addChar(input, lexeme)
-        if c in ('<', '>') and getChar(input)[0] == '=':
-            input, lexeme = addChar(input, lexeme)
+        input_, lexeme = addChar(input_, lexeme)
+        if c in ('<', '>') and getChar(input_)[0] == '=':
+            input_, lexeme = addChar(input_, lexeme)
         if lexeme in LOOKUP:
-            return (input, lexeme, LOOKUP[lexeme])
+            return (input_, lexeme, LOOKUP[lexeme])
 
     if charClass == CharClass.PUNCTUATOR:
-        input, lexeme = addChar(input, lexeme)
-        if c == ':' and getChar(input)[0] == '=':
-            input, lexeme = addChar(input, lexeme)
-            return (input, lexeme, Token.ASSIGNMENT)
+        input_, lexeme = addChar(input_, lexeme)
+        if c == ':' and getChar(input_)[0] == '=':
+            input_, lexeme = addChar(input_, lexeme)
+            return (input_, lexeme, Token.ASSIGNMENT)
         if lexeme in LOOKUP:
-            return (input, lexeme, LOOKUP[lexeme])
+            return (input_, lexeme, LOOKUP[lexeme])
 
     # TODO: anything else, raise an exception (change with syntax analyzer)
     raise Exception("Lexical Analyzer Error: unrecognized symbol was found!")
@@ -194,16 +194,16 @@ if __name__ == "__main__":
 
     # check if source file was passed and exists
     if len(sys.argv) != 2:
-        raise ValueError("Missing source file")
+        raise ValueError("Missing source file!")
     source = open(sys.argv[1], "rt")
     if not source:
-        raise IOError("Couldn't open source file")
-    input = source.read()
+        raise IOError("Could not open source file.")
+    input_ = source.read()
     source.close()
     output = []
 
     while True:  # main loop
-        input, lexeme, token = lex(input)
+        input_, lexeme, token = lex(input_)
         if lexeme == None:
             break
         output.append((lexeme, token))

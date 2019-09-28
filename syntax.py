@@ -35,18 +35,21 @@ def loadTable(input_):
        returns the "actions" and "gotos" as dictionaries"""
     actions = {}
     gotos = {}
-    header = input_.readline().strip().split(",")
+    header = input_.readline().strip().split(",")[1:]
     end = header.index("$")
     tokens = []
-    for field in header[1:end + 1]:
-        tokens.append(field)
-        # tokens.append(int(field))
+    tokens = header[:end + 1]
+    print('tokens:', tokens)
     variables = header[end + 1:]
+    print('variables:', variables)
     for line in input_:
+        # print('line:', line)
         row = line.strip().split(",")
         state = int(row[0])
+        # print('state:', state)
         for i in range(len(tokens)):
             token = tokens[i]
+            # print('token:', tokens[i])
             key = (state, token)
             value = row[i + 1]
             if len(value) == 0:
@@ -65,15 +68,13 @@ def loadTable(input_):
 def printActions(actions):
     '''prints the given actions, one per line'''
     for key in actions:
-        print(key, end=" -> ")
-        print(actions[key])
+        print(key, "->", actions[key])
 
 
 def printGotos(gotos):
     '''prints the given gotos, one per line'''
     for key in gotos:
-        print(key, end=" -> ")
-        print(gotos[key])
+        print(key, "->", gotos[key])
 
 
 def parse(input_, grammar, actions, gotos):
@@ -137,12 +138,11 @@ if __name__ == "__main__":
 
     with open("grammar.txt", "rt") as f:
         grammar = loadGrammar(f)
-        printGrammar(grammar)
+        # printGrammar(grammar)
 
     with open("slr_table.csv", "rt") as f:
         actions, gotos = loadTable(f)
-        printActions(actions)
-        printGotos(gotos)
+        # printActions(actions)
 
     # in the beginning we will write the input...
     # as a sequence of terminal symbols, ending by $
@@ -154,6 +154,7 @@ if __name__ == "__main__":
         text, lexeme, token = lex.lex(text) # lex() returns (lexeme, token)
         if not token:
             break
+        token = token.name.lower()
         output.append(token)
 
     if parse(output, grammar, actions, gotos):
