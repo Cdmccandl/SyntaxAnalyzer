@@ -96,9 +96,10 @@ def parse(input_, grammar, actions, gotos):
 
         if action is None:
             print("Expected:",
-                  ' or '.join(action[1] for action in actions
-                              if actions[action]
-                              and action[0] == stack[-1]))
+                  ' or '.join(
+                      action[1] for action in actions
+                      if actions[action]
+                      and action[0] == stack[-1]))
             return False
 
         # TODO: implement the shift operation
@@ -133,21 +134,27 @@ if __name__ == "__main__":
 
     # check if source file was passed and exists
     if len(sys.argv) != 2:
-        raise ValueError("Missing source file!")
+        raise ValueError("Error #1: Source file missing.")
     source = open(sys.argv[1], "rt")
     if not source:
-        raise IOError("Could not open source file.")
+        raise IOError("Error #2: Could not open source file.")
     text = source.read()
     source.close()
     output = []
 
-    with open("grammar.txt", "rt") as f:
-        grammar = loadGrammar(f)
-        # printGrammar(grammar)
+    try:
+        with open("grammar.txt", "rt") as f:
+            grammar = loadGrammar(f)
+            # printGrammar(grammar)
+    except IOError:
+        raise IOError("Error #4: Couldn’t open grammar file.")
 
-    with open("slr_table.csv", "rt") as f:
-        actions, gotos = loadTable(f)
-        # printActions(actions)
+    try:
+        with open("slr_table.csv", "rt") as f:
+            actions, gotos = loadTable(f)
+            # printActions(actions)
+    except IOError:
+        raise IOError("Error #5: Couldn’t open SLR table file.")
 
     # in the beginning we will write the input...
     # as a sequence of terminal symbols, ending by $
@@ -156,7 +163,10 @@ if __name__ == "__main__":
     output = []
 
     while True:
-        text, lexeme, token = lex.lex(text) # lex() returns (lexeme, token)
+        try:
+            text, lexeme, token = lex.lex(text) # lex() returns (lexeme, token)
+        except:
+            raise Exception("Error #3: Lexical error")
         if not token:
             break
         token = token.name.lower()
