@@ -158,8 +158,9 @@ def lex(input_):
             input_, lexeme = addChar(input_, lexeme)
         if lexeme in KEYWORDS:
             return(input_, lexeme, KEYWORDS[lexeme])
-        else:
-            return(input_, lexeme, Token.IDENTIFIER)
+        if lexeme in LOOKUP:
+            return(input_, lexeme, LOOKUP[lexeme])
+        return(input_, lexeme, Token.IDENTIFIER)
 
     # TODO: return digit literal vs identifier
     if charClass == CharClass.DIGIT:
