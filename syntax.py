@@ -156,6 +156,7 @@ if __name__ == "__main__":
             break
         token = token.name.lower()
         output.append(token)
+    output.append('$')
 
     if parse(output, grammar, actions, gotos):
         print("Input is syntactically correct!")
