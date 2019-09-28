@@ -1,5 +1,9 @@
 # CS3210 - Principles of Programming Languages - Fall 2019
 # A Syntax Analyzer for an expression
+# Author: Thyago Mota
+# Contributors:
+#   Conor McCandless
+#   Casey Jones
 
 import sys
 import lex

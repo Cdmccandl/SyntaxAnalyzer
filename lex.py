@@ -1,5 +1,9 @@
 # CS3210 - Principles of Programming Languages - Fall 2019
 # A Lexical Analyzer for an expression
+# Author: Thyago Mota
+# Contributors:
+#   Conor McCandless
+#   Casey Jones
 
 from enum import Enum
 import sys
