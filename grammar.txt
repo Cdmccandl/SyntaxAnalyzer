@@ -9,9 +9,9 @@ identifier' -> identifier identifier'
 identifier' -> identifier
 type -> integer_type
 type -> boolean_type
-compound_statement -> begin statement
-compound_statement' -> semicolon statement compound_statement'
-compound_statement- -> end
+compound_statement -> begin compound_statement' end
+compound_statement' ->  statement semicolon compound_statement'
+compound_statement' ->  statement
 statement -> simple_statement
 statement -> structured_statement
 simple_statement -> assignment_statement
@@ -29,8 +29,8 @@ if_statement -> if boolean_expression then statement
 while_statement -> while boolean_expression do statement
 expression -> arithmetic_expression
 expression -> boolean_expression
-arithmetic_expression -> arithmetic_expression + term 
-arithmetic_expression -> arithmetic_expression - term
+arithmetic_expression -> arithmetic_expression addition term 
+arithmetic_expression -> arithmetic_expression subtraction term
 arithmetic_expression -> term
 term -> term multiplication factor
 term -> factor
@@ -41,8 +41,8 @@ literal -> boolean_literal
 boolean_literal -> true
 boolean_literal -> false
 boolean_expression -> boolean_literal
-boolean_expression -> arithmetic_expression > arithmetic_expression
-boolean_expression -> arithmetic_expression >= arithmetic_expression
-boolean_expression -> arithmetic_expression = arithmetic_expression
-boolean_expression -> arithmetic_expression <= arithmetic_expression
-boolean_expression -> arithmetic_expression < arithmetic_expression
+boolean_expression -> arithmetic_expression greater arithmetic_expression
+boolean_expression -> arithmetic_expression greater_equal arithmetic_expression
+boolean_expression -> arithmetic_expression equal arithmetic_expression
+boolean_expression -> arithmetic_expression less_equal arithmetic_expression
+boolean_expression -> arithmetic_expression less arithmetic_expression
