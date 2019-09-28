@@ -99,7 +99,7 @@ LOOKUP = {  # lexeme to token conversion
     "begin": Token.BEGIN,
     ":": Token.COLON,
     ":=": Token.ASSIGNMENT,
-    "bool": Token.BOOLEAN_TYPE,
+    "boolean": Token.BOOLEAN_TYPE,
     "do": Token.DO,
     "else": Token.ELSE,
     "end": Token.END,

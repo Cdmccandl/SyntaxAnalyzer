@@ -93,18 +93,23 @@ def parse(input_, grammar, actions, gotos):
         action = actions[(state, token)]
         print("action: ", end="")
         print(action)
+
         if action is None:
+            print("Expected:",
+                  ' or '.join(action[1] for action in actions
+                              if actions[action]
+                              and action[0] == stack[-1]))
             return False
 
         # TODO: implement the shift operation
-            # (reads last value in imput and stores that as well as the state in the stack)
-
+            # (read the last value in the input and store is as the state in the stack)
         if 's' in action:
             sNumber = int(action[1:])
             stack.append(input_.pop(0))
             stack.append(sNumber)
 
-            # TODO: implement the reduce operation(pops the value and state from the stack and reduces)
+        # TODO: implement the reduce operation
+            # (pop the value and state from the stack and reduce)
         if 'r' in action:
             sNumber = int(action[1:])
             # gets the right hand side of the reduction from grammar
