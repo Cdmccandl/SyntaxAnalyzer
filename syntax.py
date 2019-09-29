@@ -21,6 +21,9 @@ ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
     tuple(sorted(['var', 'begin'])):
         8,  # Special word missing.
 
+    ('assignment',):
+        9,  # Symbol missing.
+
     tuple(sorted(['addition', 'subtraction',
                   'less', 'less_equal',
                   'greater', 'greater_equal',
