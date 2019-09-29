@@ -19,7 +19,12 @@ ERROR_MAPPING = { # tuples of missing tokens mapped to corresponding errors
     }
 
 ERROR = { # error codes mapped to their type and message
-    7: SyntaxError("Error #7: Identifier expected."),
+    1:  ValueError("Error #1: Source file missing."),
+    2:  IOError("Error #2: Could not open source file."),
+    3:  Exception("Error #3: Lexical error"),
+    4:  IOError("Error #4: Couldn’t open grammar file."),
+    5:  IOError("Error #5: Couldn’t open SLR table file."),
+    7:  SyntaxError("Error #7: Identifier expected."),
     10: SyntaxError("Error #10: Data type expected."),
     11: SyntaxError("Error #11: Identifier or literal value expected."),
     99: SyntaxError("Error #99: Syntax error!")
@@ -186,27 +191,27 @@ def parse(input_, grammar, actions, gotos):
 if __name__ == "__main__":
 
     if len(sys.argv) != 2: # check that source path argument was passed
-        raise ValueError("Error #1: Source file missing.")
+        raise ERROR[1] # Source file missing.
     
     try: # check that source file can be read
         with open(sys.argv[1], "rt") as source:
             text = source.read()
     except IOError:
-        raise IOError("Error #2: Could not open source file.")
+        raise ERROR[2] # Could not open source file.
 
     try: # check that grammar file can be read
         with open("grammar.txt", "rt") as f:
             grammar = loadGrammar(f)
             # printGrammar(grammar)
     except IOError:
-        raise IOError("Error #4: Couldn’t open grammar file.")
+        raise ERROR[4] # Couldn’t open grammar file.
 
     try: # check that SLR table can be read
         with open("slr_table.csv", "rt") as f:
             actions, gotos = loadTable(f)
             # printActions(actions)
     except IOError:
-        raise IOError("Error #5: Couldn’t open SLR table file.")
+        raise ERROR[5] # Couldn’t open SLR table file.
 
     # in the beginning we will write the input...
     # as a sequence of terminal symbols, ending by $
@@ -218,7 +223,7 @@ if __name__ == "__main__":
         try:
             text, lexeme, token = lex.lex(text) # lex() returns (lexeme, token)
         except:
-            raise Exception("Error #3: Lexical error")
+            raise ERROR[3] # Lexical error
         if not token:
             break
         token = token.name.lower()
