@@ -128,7 +128,6 @@ def parse(input_, grammar, actions, gotos):
                                and action[0] == stack[-1]]
             print("Expected:", ' or '.join(expected_tokens))
             expected_tokens = tuple(set(expected_tokens))
-            print(expected_tokens)
             if expected_tokens in ERROR_MAPPING:
                 raise ERROR[ERROR_MAPPING[expected_tokens]]
             else:
