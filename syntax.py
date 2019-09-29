@@ -9,26 +9,30 @@ import sys
 import lex
 from tree import Tree
 
-ERROR_MAPPING = { # tuples of missing tokens mapped to corresponding errors
+ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
     ('identifier',):
-        7, # Identifier expected.
+        7,  # Identifier expected.
     tuple(set(['integer_type', 'boolean_type'])):
-        10, # Data type expected.
+        10,  # Data type expected.
     tuple(set(['identifier', 'integer_literal', 'true', 'false'])):
-        11 # Identifier or literal value expected.
-    }
+        11  # Identifier or literal value expected.
+}
 
-ERROR = { # error codes mapped to their type and message
+ERROR = {  # error codes mapped to their type and message
     1:  ValueError("Error #1: Source file missing."),
     2:  IOError("Error #2: Could not open source file."),
     3:  Exception("Error #3: Lexical error"),
     4:  IOError("Error #4: Couldn’t open grammar file."),
     5:  IOError("Error #5: Couldn’t open SLR table file."),
+    6:  SyntaxError("Error #6: EOF expected."),
     7:  SyntaxError("Error #7: Identifier expected."),
+    8:  SyntaxError("Error #8: Special word missing."),
+    9:  SyntaxError("Error #9: Symbol missing."),
     10: SyntaxError("Error #10: Data type expected."),
     11: SyntaxError("Error #11: Identifier or literal value expected."),
     99: SyntaxError("Error #99: Syntax error!")
-    }
+}
+
 
 def loadGrammar(input_):
     """reads the given input,
@@ -134,29 +138,28 @@ def parse(input_, grammar, actions, gotos):
                 raise ERROR[99]
             return None
 
-        if 's' in action: # shift
+        if 's' in action:  # shift
             # read last value in input, push state to stack
 
             sNumber = int(action[1:])
             stack.append(input_.pop(0))
             stack.append(sNumber)
 
-            newTree = Tree() # create new tree
-            newTree.data = token # set data to token
-            trees.append(newTree) # append to list of trees
+            newTree = Tree()  # create new tree
+            newTree.data = token  # set data to token
+            trees.append(newTree)  # append to list of trees
 
-
-        if 'r' in action: # pop value & state from the stack, reduce
+        if 'r' in action:  # pop value & state from the stack, reduce
 
             sNumber = int(action[1:])
 
-            rhs = getRHS(grammar[sNumber]) # right-hand side of reduction
-            del stack[-len(rhs) * 2:] # pop 2x reduction length from stack
+            rhs = getRHS(grammar[sNumber])  # right-hand side of reduction
+            del stack[-len(rhs) * 2:]  # pop 2x reduction length from stack
 
-            lhs = getLHS(grammar[sNumber]) # left-hand side of reduction
-            stack.append(lhs) # push reduction change to stack
+            lhs = getLHS(grammar[sNumber])  # left-hand side of reduction
+            stack.append(lhs)  # push reduction change to stack
 
-            goto = gotos[stack[-2], stack[-1]] # push goto # to stack
+            goto = gotos[stack[-2], stack[-1]]  # push goto # to stack
             stack.append(int(goto))
 
             # create new tree, set data to LHS
@@ -167,12 +170,11 @@ def parse(input_, grammar, actions, gotos):
             for tree in trees[-len(rhs):]:
                 newerTree.add(tree)
 
-            trees = trees[:-len(rhs)] # remove these from list
+            trees = trees[:-len(rhs)]  # remove these from list
 
-            trees.append(newerTree) # append new tree to list of trees
+            trees.append(newerTree)  # append new tree to list of trees
 
-
-        if 'acc' in action: # accept
+        if 'acc' in action:  # accept
 
             production = grammar[0]
             lhs = getLHS(production)
@@ -184,33 +186,33 @@ def parse(input_, grammar, actions, gotos):
             for tree in trees:
                 root.add(tree)
 
-            return root # return the new tree
+            return root  # return the new tree
 
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 2: # check that source path argument was passed
-        raise ERROR[1] # Source file missing.
-    
-    try: # check that source file can be read
+    if len(sys.argv) != 2:  # check that source path argument was passed
+        raise ERROR[1]  # Source file missing.
+
+    try:  # check that source file can be read
         with open(sys.argv[1], "rt") as source:
             text = source.read()
     except IOError:
-        raise ERROR[2] # Could not open source file.
+        raise ERROR[2]  # Could not open source file.
 
-    try: # check that grammar file can be read
+    try:  # check that grammar file can be read
         with open("grammar.txt", "rt") as f:
             grammar = loadGrammar(f)
             # printGrammar(grammar)
     except IOError:
-        raise ERROR[4] # Couldn’t open grammar file.
+        raise ERROR[4]  # Couldn’t open grammar file.
 
-    try: # check that SLR table can be read
+    try:  # check that SLR table can be read
         with open("slr_table.csv", "rt") as f:
             actions, gotos = loadTable(f)
             # printActions(actions)
     except IOError:
-        raise ERROR[5] # Couldn’t open SLR table file.
+        raise ERROR[5]  # Couldn’t open SLR table file.
 
     # in the beginning we will write the input...
     # as a sequence of terminal symbols, ending by $
@@ -220,9 +222,10 @@ if __name__ == "__main__":
 
     while True:
         try:
-            text, lexeme, token = lex.lex(text) # lex() returns (lexeme, token)
+            # lex() returns (lexeme, token)
+            text, lexeme, token = lex.lex(text)
         except:
-            raise ERROR[3] # Lexical error
+            raise ERROR[3]  # Lexical error
         if not token:
             break
         token = token.name.lower()
