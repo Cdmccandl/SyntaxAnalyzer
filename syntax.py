@@ -9,6 +9,22 @@ import sys
 import lex
 from tree import Tree
 
+ERROR_MAPPING = { # tuples of missing tokens mapped to corresponding errors
+    ('identifier',):
+        7, # Identifier expected.
+    tuple(set(['integer_type', 'boolean_type'])):
+        10, # Data type expected.
+    tuple(set(['identifier', 'integer_literal', 'true', 'false'])):
+        11 # Identifier or literal value expected.
+    }
+
+ERROR = { # error codes mapped to their type and message
+    7: SyntaxError("Error #7: Identifier expected."),
+    10: SyntaxError("Error #10: Data type expected."),
+    11: SyntaxError("Error #11: Identifier or literal value expected."),
+    99: SyntaxError("Error #99: Syntax error!")
+    }
+
 def loadGrammar(input_):
     """reads the given input,
        returns the grammar as a list of productions"""
@@ -84,16 +100,16 @@ def printGotos(gotos):
 
 def parse(input_, grammar, actions, gotos):
     """given an input (a source program), grammar, actions, and gotos,
-       returns true/false depending whether the input should be accepted or not"""
+       returns Tree object if input accepted, or None if not"""
 
     trees = []
     stack = []
     stack.append(0)
     while True:
         print("stack: ", end="")
-        print(stack, end=" ")
+        print(stack)
         print("input_: ", end="")
-        print(input_, end=" ")
+        print(input_)
         state = stack[-1]
         token = input_[0]
         action = actions[(state, token)]
@@ -101,12 +117,18 @@ def parse(input_, grammar, actions, gotos):
         print(action)
 
         if action is None:
-            print("Expected:",
-                  ' or '.join(
-                      action[1] for action in actions
-                      if actions[action]
-                      and action[0] == stack[-1]))
-            return False
+            expected_tokens = [action[1]
+                               for action in actions
+                               if actions[action]
+                               and action[0] == stack[-1]]
+            print("Expected:", ' or '.join(expected_tokens))
+            expected_tokens = tuple(set(expected_tokens))
+            print(expected_tokens)
+            if expected_tokens in ERROR_MAPPING:
+                raise ERROR[ERROR_MAPPING[expected_tokens]]
+            else:
+                raise ERROR[99]
+            return None
 
         if 's' in action: # shift
             # read last value in input, push state to stack
