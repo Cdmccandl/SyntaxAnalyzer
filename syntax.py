@@ -13,7 +13,7 @@ ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
     ('identifier',):
         7,  # Identifier expected.
     ('$',):
-        6,  # Identifier expected.
+        6,  # EOF expected.
     tuple(sorted(['var', 'begin'])):
         8,  # Special word missing.
     tuple(sorted(['addition', 'less', 'subtraction', 'less_equal',
