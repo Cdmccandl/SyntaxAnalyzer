@@ -12,9 +12,16 @@ from tree import Tree
 ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
     ('identifier',):
         7,  # Identifier expected.
-    tuple(set(['integer_type', 'boolean_type'])):
+    ('$',):
+        6,  # Identifier expected.
+    tuple(sorted(['var', 'begin'])):
+        8,  # Special word missing.
+    tuple(sorted(['addition', 'less', 'subtraction', 'less_equal',
+              'greater_equal', 'greater', 'equal'])):
+        9,  # Symbol missing.
+    tuple(sorted(['integer_type', 'boolean_type'])):
         10,  # Data type expected.
-    tuple(set(['identifier', 'integer_literal', 'true', 'false'])):
+    tuple(sorted(['identifier', 'integer_literal', 'true', 'false'])):
         11  # Identifier or literal value expected.
 }
 
@@ -131,7 +138,7 @@ def parse(input_, grammar, actions, gotos):
                                if actions[action]
                                and action[0] == stack[-1]]
             print("Expected:", ' or '.join(expected_tokens))
-            expected_tokens = tuple(set(expected_tokens))
+            expected_tokens = tuple(sorted(expected_tokens))
             if expected_tokens in ERROR_MAPPING:
                 raise ERROR[ERROR_MAPPING[expected_tokens]]
             else:
