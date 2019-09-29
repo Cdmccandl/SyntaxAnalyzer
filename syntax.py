@@ -207,6 +207,6 @@ if __name__ == "__main__":
 
     if tree:
         print("Input is syntactically correct!")
-        tree.print("")
+        tree.print()
     else:
         print("Code has syntax errors!")

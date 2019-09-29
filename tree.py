@@ -1,9 +1,12 @@
 # CS3210 - Principles of Programming Languages - Fall 2019
 # A tree data-structure
-# Author: Thyago tmota
-# Date: 09/09/19
+# Author: Thyago Mota
+# Contributors:
+#   Casey Jones
+#   Conor McCandless
 
-TAB = "   "
+from operator import itemgetter
+from tree_format import format_tree
 
 
 class Tree:
@@ -12,18 +15,20 @@ class Tree:
         self.data = None
         self.children = []
 
+    @property
+    def node(self):
+        return (self.data,
+                [child.node
+                 for child
+                 in self.children])
+
     def add(self, child):
         self.children.append(child)
 
-    def print(self, tab=""):
-        if self.data != None:
-            print(tab + self.data)
-            tab += TAB
-            for child in self.children:
-                if isinstance(child, Tree):
-                    child.print(tab)
-                else:
-                    print(tab + child)
+    def print(self):
+        print(format_tree(self.node,
+            format_node = itemgetter(0),
+            get_children = itemgetter(1)))
 
 
 if __name__ == "__main__":
