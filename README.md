@@ -1,8 +1,7 @@
-# CS3210 - Principles of Programming Languages - Fall 2019
-# Metropolitan State University of Denver
-# Programming assignment 1: Syntax Analyzer
-# Conor McCandless
-# Casey Jones
+# CS3210 - Principles of Programming Languages
+## Programming assignment 1: Syntax Analyzer
+### Fall 2019, Metropolitan State University of Denver
+#### Conor McCandless, Casey Jones
 
 Syntax Analyzer for the grammar given in grammar.txt.
 The program uses a lexical analyzer to scan a source file and generate tokens for each term.
@@ -16,6 +15,6 @@ This parse tree shows paths taken to determine that the given source file is syn
 The external modules tree-format and termcolor are used as dependencies.
 These are bundled along with this distribution.
 Alternatively, they may be installed with either the following command:
-	pip install -r requirements.txt
+	'pip install -r requirements.txt'
 Or:
-	pip install tree-format termcolor
+	'pip install tree-format termcolor'
