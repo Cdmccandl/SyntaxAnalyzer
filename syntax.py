@@ -7,6 +7,7 @@
 
 import sys
 import lex
+from tree import Tree
 
 def loadGrammar(input_):
     """reads the given input,
@@ -85,6 +86,7 @@ def parse(input_, grammar, actions, gotos):
     """given an input (a source program), grammar, actions, and gotos,
        returns true/false depending whether the input should be accepted or not"""
 
+    trees = []
     stack = []
     stack.append(0)
     while True:
@@ -107,29 +109,56 @@ def parse(input_, grammar, actions, gotos):
             return False
 
         if 's' in action: # shift
-            # (read the last value in the input
-            #  and store is as the state in the stack)
+            # read last value in input, push state to stack
+
             sNumber = int(action[1:])
             stack.append(input_.pop(0))
             stack.append(sNumber)
 
-        if 'r' in action: # reduce
-            # (pop the value and state from the stack and reduce)
+            newTree = Tree() # create new tree
+            newTree.data = token # set data to token
+            trees.append(newTree) # append to list of trees
+
+
+        if 'r' in action: # pop value & state from the stack, reduce
+
             sNumber = int(action[1:])
-            # gets the right hand side of the reduction from grammar
-            reduction = getRHS(grammar[sNumber])
-            # removes 2 times the length of the reduction from the stack
-            del stack[-len(reduction) * 2:]
-            # gets the left hand side of the reduction from grammar
-            reduction = getLHS(grammar[sNumber])
-            # appends the reduction change to the stack
-            stack.append(reduction)
-            reduction = gotos[stack[-2], stack[-1]]
-            # appends the new goto number to the stack cast as an integer
-            stack.append(int(reduction))
+
+            rhs = getRHS(grammar[sNumber]) # right-hand side of reduction
+            del stack[-len(rhs) * 2:] # pop 2x reduction length from stack
+
+            lhs = getLHS(grammar[sNumber]) # left-hand side of reduction
+            stack.append(lhs) # push reduction change to stack
+
+            goto = gotos[stack[-2], stack[-1]] # push goto # to stack
+            stack.append(int(goto))
+
+            # create new tree, set data to LHS
+            newerTree = Tree()
+            newerTree.data = lhs
+
+            # add len(rhs) trees from list as children of new tree
+            for tree in trees[-len(rhs):]:
+                newerTree.add(tree)
+
+            trees = trees[:-len(rhs)] # remove these from list
+
+            trees.append(newerTree) # append new tree to list of trees
+
 
         if 'acc' in action: # accept
-            return True
+
+            production = grammar[0]
+            lhs = getLHS(production)
+            rhs = getRHS(production)
+
+            # same as reduce but with first rule of grammar
+            root = Tree()
+            root.data = lhs
+            for tree in trees:
+                root.add(tree)
+
+            return root # return the new tree
 
 
 if __name__ == "__main__":
@@ -174,7 +203,10 @@ if __name__ == "__main__":
         output.append(token)
     output.append('$')
 
-    if parse(output, grammar, actions, gotos):
+    tree = parse(output, grammar, actions, gotos)
+
+    if tree:
         print("Input is syntactically correct!")
+        tree.print("")
     else:
         print("Code has syntax errors!")
