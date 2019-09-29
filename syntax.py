@@ -106,16 +106,15 @@ def parse(input_, grammar, actions, gotos):
                       and action[0] == stack[-1]))
             return False
 
-        # TODO: implement the shift operation
-            # (read the last value in the input and store is as the state in the stack)
-        if 's' in action:
+        if 's' in action: # shift
+            # (read the last value in the input
+            #  and store is as the state in the stack)
             sNumber = int(action[1:])
             stack.append(input_.pop(0))
             stack.append(sNumber)
 
-        # TODO: implement the reduce operation
+        if 'r' in action: # reduce
             # (pop the value and state from the stack and reduce)
-        if 'r' in action:
             sNumber = int(action[1:])
             # gets the right hand side of the reduction from grammar
             reduction = getRHS(grammar[sNumber])
@@ -129,31 +128,29 @@ def parse(input_, grammar, actions, gotos):
             # appends the new goto number to the stack cast as an integer
             stack.append(int(reduction))
 
-        # TODO: not a shift or reduce operation, must be an "accept" operation
-        if 'acc' in action:
+        if 'acc' in action: # accept
             return True
 
 
 if __name__ == "__main__":
 
-    # check if source file was passed and exists
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 2: # check that source path argument was passed
         raise ValueError("Error #1: Source file missing.")
-    source = open(sys.argv[1], "rt")
-    if not source:
+    
+    try: # check that source file can be read
+        with open(sys.argv[1], "rt") as source:
+            text = source.read()
+    except IOError:
         raise IOError("Error #2: Could not open source file.")
-    text = source.read()
-    source.close()
-    output = []
 
-    try:
+    try: # check that grammar file can be read
         with open("grammar.txt", "rt") as f:
             grammar = loadGrammar(f)
             # printGrammar(grammar)
     except IOError:
         raise IOError("Error #4: Couldn’t open grammar file.")
 
-    try:
+    try: # check that SLR table can be read
         with open("slr_table.csv", "rt") as f:
             actions, gotos = loadTable(f)
             # printActions(actions)
