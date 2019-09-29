@@ -11,10 +11,9 @@ If there are syntax errors, the program will generate an error code depicting th
 If there are no syntax errors, a parse tree is generated and displayed on the console.
 This parse tree shows paths taken to determine that the given source file is syntactically correct.
 
-#Requirements:
+## Requirements
+
 The external modules tree-format and termcolor are used as dependencies.
 These are bundled along with this distribution.
-Alternatively, they may be installed with either the following command:
-	'pip install -r requirements.txt'
-Or:
-	'pip install tree-format termcolor'
+
+Alternatively, they may be installed with either `pip install -r requirements.txt` or `pip install tree-format termcolor`.
