@@ -7,6 +7,7 @@
 
 from operator import itemgetter
 from tree_format import format_tree
+from termcolor import colored
 
 
 class Tree:
@@ -17,7 +18,9 @@ class Tree:
 
     @property
     def node(self):
-        return (self.data,
+        return (colored(self.data, 'blue')
+                if self.children
+                else colored(self.data, 'magenta'),
                 [child.node
                  for child
                  in self.children])

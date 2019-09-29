@@ -6,31 +6,43 @@
 #   Casey Jones
 
 import sys
-import lex
+from termcolor import colored
+from lex import Lexer
 from tree import Tree
 
 ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
+
     ('identifier',):
         7,  # Identifier expected.
+
     ('$',):
         6,  # EOF expected.
+
     tuple(sorted(['var', 'begin'])):
         8,  # Special word missing.
-    tuple(sorted(['addition', 'less', 'subtraction', 'less_equal',
-              'greater_equal', 'greater', 'equal'])):
+
+    tuple(sorted(['addition', 'subtraction',
+                  'less', 'less_equal',
+                  'greater', 'greater_equal',
+                  'equal'])):
         9,  # Symbol missing.
-    tuple(sorted(['integer_type', 'boolean_type'])):
+
+    tuple(sorted(['integer_type',
+                  'boolean_type'])):
         10,  # Data type expected.
-    tuple(sorted(['identifier', 'integer_literal', 'true', 'false'])):
+
+    tuple(sorted(['identifier',
+                  'integer_literal',
+                  'true', 'false'])):
         11  # Identifier or literal value expected.
 }
 
 ERROR = {  # error codes mapped to their type and message
-    1:  ValueError("Error #1: Source file missing."),
-    2:  IOError("Error #2: Could not open source file."),
-    3:  Exception("Error #3: Lexical error"),
-    4:  IOError("Error #4: Couldn’t open grammar file."),
-    5:  IOError("Error #5: Couldn’t open SLR table file."),
+    1:  ValueError ("Error #1: Source file missing."),
+    2:  IOError    ("Error #2: Could not open source file."),
+    3:  Exception  ("Error #3: Lexical error"),
+    4:  IOError    ("Error #4: Couldn’t open grammar file."),
+    5:  IOError    ("Error #5: Couldn’t open SLR table file."),
     6:  SyntaxError("Error #6: EOF expected."),
     7:  SyntaxError("Error #7: Identifier expected."),
     8:  SyntaxError("Error #8: Special word missing."),
@@ -44,24 +56,30 @@ ERROR = {  # error codes mapped to their type and message
 def loadGrammar(input_):
     """reads the given input,
        returns the grammar as a list of productions"""
+
     grammar = []
+
     for line in input_:
         grammar.append(line.strip())
+
     return grammar
 
 
 def getLHS(production):
-    '''returns the LHS (left hand side) of a given production'''
+    '''returns the left-hand side of a given production'''
+
     return production.split("->")[0].strip()
 
 
 def getRHS(production):
-    '''returns the RHS (right hand side) of a given production'''
+    '''returns the right-hand side of a given production'''
+
     return production.split("->")[1].strip().split(" ")
 
 
 def printGrammar(grammar):
-    '''prints the productions of a given grammar - one per line'''
+    '''prints the productions of a given grammar, one per line'''
+
     for production in grammar:
         print(getLHS(production), end=" -> ")
         print(getRHS(production))
@@ -70,20 +88,24 @@ def printGrammar(grammar):
 def loadTable(input_):
     """reads the given input containing an SLR parsing table,
        returns the "actions" and "gotos" as dictionaries"""
+
     actions = {}
     gotos = {}
     header = input_.readline().strip().split(",")[1:]
     end = header.index("$")
     tokens = []
     tokens = header[:end + 1]
-    print('tokens:', tokens)
+    # print('tokens:', tokens)
     variables = header[end + 1:]
-    print('variables:', variables)
+    # print('variables:', variables)
+
     for line in input_:
+
         # print('line:', line)
         row = line.strip().split(",")
         state = int(row[0])
         # print('state:', state)
+
         for i in range(len(tokens)):
             token = tokens[i]
             # print('token:', tokens[i])
@@ -92,6 +114,7 @@ def loadTable(input_):
             if len(value) == 0:
                 value = None
             actions[key] = value
+
         for i in range(len(variables)):
             variable = variables[i]
             key = (state, variable)
@@ -99,57 +122,81 @@ def loadTable(input_):
             if len(value) == 0:
                 value = None
             gotos[key] = value
+
     return (actions, gotos)
 
 
 def printActions(actions):
     '''prints the given actions, one per line'''
+
     for key in actions:
         print(key, "->", actions[key])
 
 
 def printGotos(gotos):
     '''prints the given gotos, one per line'''
+
     for key in gotos:
         print(key, "->", gotos[key])
 
 
-def parse(input_, grammar, actions, gotos):
+def parse(tokens, grammar, actions, gotos):
     """given an input (a source program), grammar, actions, and gotos,
        returns Tree object if input accepted, or None if not"""
 
     trees = []
     stack = []
     stack.append(0)
+    keys = list(tokens.keys())
+
     while True:
-        print("stack: ", end="")
-        print(stack)
-        print("input_: ", end="")
-        print(input_)
+
+        # print("stack: ", stack)
+        # print("input: ", tokens)
         state = stack[-1]
-        token = input_[0]
+        token = tokens[keys[0]]
         action = actions[(state, token)]
-        print("action: ", end="")
-        print(action)
+        # print("action: ", end="")
+        # print(action)
 
         if action is None:
+
+            print("stack:",  ', '.join([str(element)
+                                        for element
+                                        in stack]))
+
+            print("input:", ', '.join([element
+                                       for element
+                                       in tokens.values()]))
+
             expected_tokens = [action[1]
                                for action in actions
                                if actions[action]
                                and action[0] == stack[-1]]
-            print("Expected:", ' or '.join(expected_tokens))
+
+            print(colored("Syntax error at "
+                          + "line " + str(keys[0][0]) + ', '
+                          + "column " + str(keys[0][1]) + "!",
+                          'red'))
+
+            print(colored("  Expected: "
+                          + ' or '.join(expected_tokens),
+                          'yellow'))
+
             expected_tokens = tuple(sorted(expected_tokens))
             if expected_tokens in ERROR_MAPPING:
                 raise ERROR[ERROR_MAPPING[expected_tokens]]
             else:
                 raise ERROR[99]
+
             return None
 
         if 's' in action:  # shift
             # read last value in input, push state to stack
 
             sNumber = int(action[1:])
-            stack.append(input_.pop(0))
+            stack.append(tokens.pop(keys[0]))
+            keys.pop(0)
             stack.append(sNumber)
 
             newTree = Tree()  # create new tree
@@ -203,7 +250,7 @@ if __name__ == "__main__":
 
     try:  # check that source file can be read
         with open(sys.argv[1], "rt") as source:
-            text = source.read()
+            input_ = source.read()
     except IOError:
         raise ERROR[2]  # Could not open source file.
 
@@ -227,19 +274,15 @@ if __name__ == "__main__":
 
     output = []
 
-    while True:
-        try:
-            # lex() returns (lexeme, token)
-            text, lexeme, token = lex.lex(text)
-        except:
-            raise ERROR[3]  # Lexical error
-        if not token:
-            break
-        token = token.name.lower()
-        output.append(token)
-    output.append('$')
+    try:
+        lexer = Lexer(input_)
+        tokens = {key: result[1].name.lower() # result = (lexeme, token)
+                  for key, result
+                  in lexer.output.items()}
+    except:
+        raise ERROR[3]  # Lexical error
 
-    tree = parse(output, grammar, actions, gotos)
+    tree = parse(tokens, grammar, actions, gotos)
 
     if tree:
         print("Input is syntactically correct!")

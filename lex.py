@@ -8,11 +8,9 @@
 from enum import Enum
 import sys
 
-# all char classes
-# TODO update CharClass with new Grammar
-
 
 class CharClass(Enum):
+    '''all char classes'''
     EOF = 1
     LETTER = 2
     DIGIT = 3
@@ -21,45 +19,6 @@ class CharClass(Enum):
     QUOTE = 6
     BLANK = 7
     OTHER = 8
-
-
-def getChar(input_):  # TODO getChar update with new Grammar
-    '''reads the next char from input_ and returns its class'''
-    if len(input_) == 0:
-        return (None, CharClass.EOF)
-    c = input_[0].lower()
-    if c.isalpha():
-        return (c, CharClass.LETTER)
-    if c.isdigit():
-        return (c, CharClass.DIGIT)
-    if c == '"':
-        return (c, CharClass.QUOTE)
-    if c in ['+', '-', '*', '/', '>', '=', '<']:
-        return (c, CharClass.OPERATOR)
-    if c in ['.', ':', ',', ';']:
-        return (c, CharClass.PUNCTUATOR)
-    if c in [' ', '\n', '\t']:
-        return (c, CharClass.BLANK)
-    return (c, CharClass.OTHER)
-
-
-def getNonBlank(input_):
-    '''calls getChar and getChar until it returns a non-blank'''
-    ignore = ""
-    while True:
-        c, charClass = getChar(input_)
-        if charClass == CharClass.BLANK:
-            input_, ignore = addChar(input_, ignore)
-        else:
-            return input_
-
-
-def addChar(input_, lexeme):
-    '''adds the next char from input_ to lexeme, advancing the input_ by one char'''
-    if len(input_) > 0:
-        lexeme += input_[0]
-        input_ = input_[1:]
-    return (input_, lexeme)
 
 
 class Token(Enum):
@@ -94,6 +53,8 @@ class Token(Enum):
     WHILE = 28
     WRITE = 29
 
+class EOF():
+    name = '$'
 
 LOOKUP = {  # lexeme to token conversion
     # TODO how to represent integer literal and type
@@ -142,76 +103,146 @@ KEYWORDS = {
     }
 
 
-def lex(input_):
-    '''returns the next (lexeme, token) pair or None if EOF is reached'''
+class Lexer:
 
-    input_ = getNonBlank(input_)
+    def __init__(self, input_):
+        self.input = input_
+        self.results = {}
+        self.pos = 0
+        self.line = 1
+        self.column = 1
 
-    c, charClass = getChar(input_)
-    lexeme = ""
+    @property
+    def c(self):
+        '''current character'''
+        return self.input[self.pos].lower()
 
-    # check EOF first
-    if charClass == CharClass.EOF:
-        return (input_, None, None)
+    @property
+    def charClass(self):
+        '''charClass of current character'''
 
-    # TODO: read letters
-    if charClass == CharClass.LETTER:
-        input_, lexeme = addChar(input_, lexeme)
-        while getChar(input_)[1] in (charClass.LETTER,
-                                    charClass.DIGIT):
-            input_, lexeme = addChar(input_, lexeme)
-        if lexeme in KEYWORDS:
-            return(input_, lexeme, KEYWORDS[lexeme])
-        if lexeme in LOOKUP:
-            return(input_, lexeme, LOOKUP[lexeme])
-        return(input_, lexeme, Token.IDENTIFIER)
+        if self.pos == len(self.input):
+            return CharClass.EOF
+        if self.c.isalpha():
+            return CharClass.LETTER
+        if self.c.isdigit():
+            return CharClass.DIGIT
+        if self.c == '"':
+            return CharClass.QUOTE
+        if self.c in ['+', '-', '*', '/', '>', '=', '<']:
+            return CharClass.OPERATOR
+        if self.c in ['.', ':', ',', ';']:
+            return CharClass.PUNCTUATOR
+        if self.c in [' ', '\n', '\t']:
+            return CharClass.BLANK
+        return CharClass.OTHER
 
-    # TODO: return digit literal vs identifier
-    if charClass == CharClass.DIGIT:
+
+    def getNonBlank(self):
+        '''seek to next non-blank character'''
+
         while True:
-            input_, lexeme = addChar(input_, lexeme)
-            c, charClass = getChar(input_)
-            if charClass != CharClass.DIGIT:
+            if self.charClass == CharClass.BLANK:
+                self.addChar("") # ignore
+            else:
                 break
-        return (input_, lexeme, Token.INTEGER_LITERAL)
 
-    # TODO: read an operator
-    # TODO add conditional for :=
-    if charClass == CharClass.OPERATOR:
-        input_, lexeme = addChar(input_, lexeme)
-        if c in ('<', '>') and getChar(input_)[0] == '=':
-            input_, lexeme = addChar(input_, lexeme)
-        if lexeme in LOOKUP:
-            return (input_, lexeme, LOOKUP[lexeme])
 
-    if charClass == CharClass.PUNCTUATOR:
-        input_, lexeme = addChar(input_, lexeme)
-        if c == ':' and getChar(input_)[0] == '=':
-            input_, lexeme = addChar(input_, lexeme)
-            return (input_, lexeme, Token.ASSIGNMENT)
-        if lexeme in LOOKUP:
-            return (input_, lexeme, LOOKUP[lexeme])
+    def addChar(self, lexeme):
+        '''add next char from input to lexeme, advance input by one char'''
 
-    # TODO: anything else, raise an exception (change with syntax analyzer)
-    raise Exception("Lexical Analyzer Error: unrecognized symbol was found!")
+        if self.pos < len(self.input):
+            lexeme += self.input[self.pos]
+            if self.c == '\n':
+                self.line += 1
+                self.column = 1
+            else:
+                self.column += 1
+            self.pos += 1
+
+        return lexeme
+
+
+    def add_lexeme(self, line, column, lexeme, token):
+        self.results[(line, column)] = (lexeme, token)
+        return (lexeme, token)
+
+    def lex(self):
+        '''returns the next (lexeme, token) pair or None if EOF is reached'''
+
+        self.getNonBlank()
+
+        line = self.line
+        column = self.column
+
+        lexeme = ""
+
+        # check EOF first
+        if self.charClass == CharClass.EOF:
+            return self.add_lexeme(line, column, None, EOF)
+
+        # read letters
+        if self.charClass == CharClass.LETTER:
+            lexeme = self.addChar(lexeme)
+            while self.charClass in (CharClass.LETTER,
+                                     CharClass.DIGIT):
+                lexeme = self.addChar(lexeme)
+            if lexeme in KEYWORDS:
+                return self.add_lexeme(line, column, lexeme, KEYWORDS[lexeme])
+            if lexeme in LOOKUP:
+                return self.add_lexeme(line, column, lexeme, LOOKUP[lexeme])
+            return self.add_lexeme(line, column, lexeme, Token.IDENTIFIER)
+
+        # return digit literal vs identifier
+        if self.charClass == CharClass.DIGIT:
+            while True:
+                lexeme = self.addChar(lexeme)
+                if self.charClass != CharClass.DIGIT:
+                    break
+            return self.add_lexeme(line, column, lexeme, Token.INTEGER_LITERAL)
+
+        # read an operator
+        if self.charClass == CharClass.OPERATOR:
+            lexeme = self.addChar(lexeme)
+            if lexeme in ('<', '>') and self.c == '=':
+                lexeme = self.addChar(lexeme)
+            if lexeme in LOOKUP:
+                return self.add_lexeme(line, column, lexeme, LOOKUP[lexeme])
+
+        # read an punctuator
+        if self.charClass == CharClass.PUNCTUATOR:
+            lexeme = self.addChar(lexeme)
+            if lexeme == ':' and self.c == '=':
+                lexeme = self.addChar(lexeme)
+                return self.add_lexeme(line, column, lexeme, Token.ASSIGNMENT)
+            if lexeme in LOOKUP:
+                return self.add_lexeme(line, column, lexeme, LOOKUP[lexeme])
+
+        # anything else, raise an exception
+        raise Exception("Lexical Analyzer Error: unrecognized symbol!")
+
+    @property
+    def output(self):
+
+        while True:
+            lexeme, token = self.lex()
+            if token == EOF:
+                break
+
+        return self.results
 
 if __name__ == "__main__":
 
-    # check if source file was passed and exists
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 2:  # check that source path argument was passed
         raise ValueError("Missing source file!")
-    source = open(sys.argv[1], "rt")
-    if not source:
+
+    try:  # check that source file can be read
+        with open(sys.argv[1], "rt") as source:
+            input_ = source.read()
+    except IOError:
         raise IOError("Could not open source file.")
-    input_ = source.read()
-    source.close()
-    output = []
 
-    while True:  # main loop
-        input_, lexeme, token = lex(input_)
-        if lexeme == None:
-            break
-        output.append((lexeme, token))
+    lexer = Lexer(input_)
 
-    for (lexeme, token) in output:  # prints output
+    for lexeme, token in lexer.output.values():
         print(lexeme, token)
