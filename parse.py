@@ -10,6 +10,21 @@ from termcolor import colored
 from lex import Lexer
 from tree import Tree
 
+SYMBOLS = {
+    'period':         '.',
+    'colon':          ':',
+    'semicolon':      ';',
+    'assignment':     ':=',
+    'addition':       '+',
+    'subtraction':    '-',
+    'multiplication': '*',
+    'greater':        '>',
+    'greater_eq':     '>=',
+    'equal':          '=',
+    'less_equal':     '<=',
+    'less':           '<'
+    }
+
 ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
 
     ('identifier',):
@@ -21,13 +36,10 @@ ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
     tuple(sorted(['var', 'begin'])):
         8,  # Special word missing.
 
-    ('assignment',):
+    (':=',):
         9,  # Symbol missing.
 
-    tuple(sorted(['addition', 'subtraction',
-                  'less', 'less_equal',
-                  'greater', 'greater_equal',
-                  'equal'])):
+    tuple(sorted(['+', '-', '<', '<=', '>', '>=', '='])):
         9,  # Symbol missing.
 
     tuple(sorted(['integer_type',
@@ -147,6 +159,13 @@ def parse(tokens, grammar, actions, gotos):
     """given an input (a source program), grammar, actions, and gotos,
        returns Tree object if input accepted, or None if not"""
 
+    tokens = {key:
+              SYMBOLS[token]
+              if token in SYMBOLS
+              else token
+              for key, token
+              in tokens.items()}
+
     trees = []
     stack = []
     stack.append(0)
@@ -176,6 +195,11 @@ def parse(tokens, grammar, actions, gotos):
                                for action in actions
                                if actions[action]
                                and action[0] == stack[-1]]
+
+            expected_tokens = [SYMBOLS[token]
+                               if token in SYMBOLS
+                               else token
+                               for token in expected_tokens]
 
             print(colored("Syntax error at "
                           + "line " + str(keys[0][0]) + ', '
