@@ -3,13 +3,24 @@
 ### Fall 2019, Metropolitan State University of Denver
 #### Conor McCandless, Casey Jones
 
-Syntax Analyzer for the grammar given in grammar.txt.
-The program uses a lexical analyzer to scan a source file and generate tokens for each term.
-The syntax analyzer then takes this input and parses it using a bottom-up parsing method.
+a syntax analyzer for the grammar given in grammar.txt
+
+To parse your source code, run parse.py with your file's path as the only argument:
+```
+python parse.py [SOURCE_FILE]
+```
+
+You can also view the lexemes and tokens identified by the lexer by running lex.py in similar fashion:
+```
+python lex.py [SOURCE_FILE]
+```
+
+The syntax analyzer uses the lexical analyzer to scan a source file and generate tokens for each term.
+It then parses these symbols using a bottom-up parsing method.
 The source file is then determined to be syntactically correct or incorrect.
 If there are syntax errors, the program will generate an error code depicting the cause.
 If there are no syntax errors, a parse tree is generated and displayed on the console.
-This parse tree shows paths taken to determine that the given source file is syntactically correct.
+The parse tree will show the paths taken to verify that the given source file was syntactically correct.
 
 ## Requirements
 
