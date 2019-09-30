@@ -7,6 +7,7 @@
 
 from enum import Enum
 import sys
+from termcolor import colored
 
 
 class CharClass(Enum):
@@ -218,8 +219,14 @@ class Lexer:
             if lexeme in LOOKUP:
                 return self.add_lexeme(line, column, lexeme, LOOKUP[lexeme])
 
+        print('self.c:', self.c)
+
         # anything else, raise an exception
-        raise Exception("Lexical Analyzer Error: unrecognized symbol!")
+        raise Exception(colored("Lexical Analyzer Error:", 'red') + ' '
+                        + colored("unrecognized symbol '" + lexeme
+                        + "' at line " + str(line)
+                        + ", column " + str(column)
+                        + '!', 'yellow'))
 
     @property
     def output(self):

@@ -53,18 +53,30 @@ ERROR_MAPPING = {  # tuples of missing tokens mapped to corresponding errors
 }
 
 ERROR = {  # error codes mapped to their type and message
-    1:  ValueError ("Error #1: Source file missing."),
-    2:  IOError    ("Error #2: Could not open source file."),
-    3:  Exception  ("Error #3: Lexical error"),
-    4:  IOError    ("Error #4: Couldn’t open grammar file."),
-    5:  IOError    ("Error #5: Couldn’t open SLR table file."),
-    6:  SyntaxError("Error #6: EOF expected."),
-    7:  SyntaxError("Error #7: Identifier expected."),
-    8:  SyntaxError("Error #8: Special word missing."),
-    9:  SyntaxError("Error #9: Symbol missing."),
-    10: SyntaxError("Error #10: Data type expected."),
-    11: SyntaxError("Error #11: Identifier or literal value expected."),
-    99: SyntaxError("Error #99: Syntax error!")
+    1:  ValueError  (colored("Error #1", 'red') + ": "
+                     + colored("Source file missing.", 'yellow')),
+    2:  IOError     (colored("Error #2", 'red') + ": "
+                     + colored("Could not open source file.", 'yellow')),
+    3:  Exception   (colored("Error #3", 'red') + ": "
+                     + colored("Lexical error", 'yellow')),
+    4:  IOError     (colored("Error #4", 'red') + ": "
+                     + colored("Couldn’t open grammar file.", 'yellow')),
+    5:  IOError     (colored("Error #5", 'red') + ": "
+                     + colored("Couldn’t open SLR table file.", 'yellow')),
+    6:  SyntaxError (colored("Error #6", 'red') + ": "
+                     + colored("EOF expected.", 'yellow')),
+    7:  SyntaxError (colored("Error #7", 'red') + ": "
+                     + colored("Identifier expected.", 'yellow')),
+    8:  SyntaxError (colored("Error #8", 'red') + ": "
+                     + colored("Special word missing.", 'yellow')),
+    9:  SyntaxError (colored("Error #9", 'red') + ": "
+                     + colored("Symbol missing.", 'yellow')),
+    10: SyntaxError (colored("Error #10", 'red') + ": "
+                     + colored("Data type expected.", 'yellow')),
+    11: SyntaxError (colored("Error #11", 'red') + ": "
+                     + colored("Identifier or literal value expected.", 'yellow')),
+    99: SyntaxError (colored("Error #99", 'red') + ": "
+                     + colored("Syntax error!", 'yellow'))
 }
 
 
